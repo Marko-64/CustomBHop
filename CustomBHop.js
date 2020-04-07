@@ -7,12 +7,11 @@ var customBHopModuleClient;
 
 var Strafe = moduleManager.getModule("Strafe");
 
-var c03packetplayer = Java.type("net.minecraft.network.play.client.C03PacketPlayer");
-
 var client;
 var client2;
 var client3;
-var inrunAirSpeed;
+var inrunAirSpeed = 0;
+var inrunTimer = 0;
 var x;
 var z;
 
@@ -20,7 +19,7 @@ function CustomBHopModule() {
 	var resetH = value.createBoolean("resetH", true);
 	var resetY = value.createBoolean("resetY", true);
 	var strafing = value.createBoolean("strafing", true);
-	var timer = value.createBoolean("timer", false);
+	var TimerState = value.createBoolean("Timer", false);
 	var stairorslab = value.createBoolean("stairorslab", true);
 	var sneakjump = value.createBoolean("sneakjump", true);
 	var waterjump = value.createBoolean("waterjump", false);
@@ -34,7 +33,7 @@ function CustomBHopModule() {
 	var jumpHaslant = value.createFloat("jumpHaslant", 0.2, 0.00, 0.50);
 	var jumpHClip = value.createFloat("jumpHClip", 0, -0.10, 0.10);
 	var jumpSlab = value.createFloat("jumpSlab", 0.15, 0.00, 0.50);
-	var SlabY = value.createFloat("SlabY", -0.10, -1.00, 0.00);
+	var SlabY = value.createFloat("SlabY", -0.10, -1.00, 1.00);
 	var inrunsteps = value.createInteger("inrunsteps", 5, 1, 20);
 	var maxinrunjumpY = value.createFloat("maxinrunjumpY", 0.0, 0.00, 1.00);
 	var maxinrunjumpH = value.createFloat("maxinrunjumpH", 0.2, 0.00, 1.00);
@@ -76,7 +75,6 @@ function CustomBHopModule() {
 	var inrunstep;
 	var inrunspeed2;
 	var inrunspeedGumper;
-	var inrunTimer;
 	var airSpeed1;
 	var airSpeed2;
 	var jumph;
@@ -87,7 +85,6 @@ function CustomBHopModule() {
 	var SlabY2;
 	var posX;
 	var posZ;
-	var Ymax;
 	var accuracy = 1.4;
 
     this.getName = function() {
@@ -157,7 +154,7 @@ function CustomBHopModule() {
 			jumph = jumpHaslant.get();
 		};
 
-				if ((!(Math.round(posY - 0.1) == Math.round(posY)) && !(mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, mc.thePlayer.motionY - 1, 0).expand(0, 0, 0)).isEmpty())) && stairorslab.get() && (maxinrunjumpY.get() <= 0.60)){
+		if ((!(Math.round(posY - 0.1) == Math.round(posY)) && !(mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, mc.thePlayer.motionY - 1, 0).expand(0, 0, 0)).isEmpty())) && stairorslab.get() && (maxinrunjumpY.get() <= 0.60)){
 			jumph = jumpSlab.get();
 			inrunspeed2 = -2;
 			SlabY2 = SlabY.get();
@@ -256,9 +253,6 @@ function CustomBHopModule() {
 				jumpH2 = jumph;
 				inrunAirSpeed = 0;
 			};
-			if (posX <= mc.thePlayer.posX && posZ <= mc.thePlayer.posZ && (!(posX < mc.thePlayer.posX && posX + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posX) && !(posZ < mc.thePlayer.posZ && posZ + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posZ)) || (posX <= mc.thePlayer.posX && posZ >= mc.thePlayer.posZ && (!(posX < mc.thePlayer.posX && posX + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posX) && !(posZ > mc.thePlayer.posZ && posZ - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posZ))) || (posX >= mc.thePlayer.posX && posZ >= mc.thePlayer.posZ && (!(posX > mc.thePlayer.posX && posX - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posX) && !(posZ > mc.thePlayer.posZ && posZ - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posZ))) || (posX >= mc.thePlayer.posX && posZ <= mc.thePlayer.posZ && (!(posX > mc.thePlayer.posX && posX - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posX) && !(posZ < mc.thePlayer.posZ && posZ + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posZ)))){
-				inrunspeed2 = -2;
-			};
 			posX = mc.thePlayer.posX;
 			posZ = mc.thePlayer.posZ;
 			if(mc.thePlayer.onGround){
@@ -271,8 +265,8 @@ function CustomBHopModule() {
 				airSpeed2 = 0;
 				ticks++;
 				if(mc.thePlayer.motionY > 0){
-					if (timer.get()) {
-						mc.timer.timerSpeed = upTimer.get() + inrunTimer;
+					if (TimerState.get()) {
+						mc.timer.timerSpeed = upTimer.get();
 					};
 					mY(upYType.get(), upY.get() + SlabY2);
 					mXZ(upHType.get(), upH.get());
@@ -282,8 +276,8 @@ function CustomBHopModule() {
 					airSpeed1 
 				};
 				if(mc.thePlayer.motionY < 0){
-					if (timer.get()) {
-						mc.timer.timerSpeed = downTimer.get() + inrunTimer;
+					if (TimerState.get()) {
+						mc.timer.timerSpeed = downTimer.get();
 					};
 					mY(downYType.get(), downY.get());
 					mXZ(downHType.get(), downH.get());
@@ -292,8 +286,8 @@ function CustomBHopModule() {
 					airSpeed2 += airSpeed1 * 10;
 				};
 				if(ticks < ticksAction.get()){
-					if (timer.get()) {
-						mc.timer.timerSpeed = beforeTimer.get() + inrunTimer;
+					if (TimerState.get()) {
+						mc.timer.timerSpeed = beforeTimer.get();
 					};
 					mY(beforeYType.get(), beforeY.get());
 					mXZ(beforeHType.get(), beforeH.get());
@@ -302,8 +296,8 @@ function CustomBHopModule() {
 					airSpeed2 += airSpeed1 * 10;
 				};
 				if(ticks > ticksAction.get()){
-					if (timer.get()) {
-						mc.timer.timerSpeed = afterTimer.get() + inrunTimer;
+					if (TimerState.get()) {
+						mc.timer.timerSpeed = afterTimer.get();
 					};
 					mY(afterYType.get(), afterY.get());
 					mXZ(afterHType.get(), afterH.get());
@@ -312,8 +306,8 @@ function CustomBHopModule() {
 					airSpeed2 += airSpeed1 * 10;
 				};
 				if(ticks == ticksAction.get()){
-					if (timer.get()) {
-						mc.timer.timerSpeed = whenTimer.get() + inrunTimer;
+					if (TimerState.get()) {
+						mc.timer.timerSpeed = whenTimer.get();
 					};
 					mY(whenYType.get(), whenY.get());
 					mXZ(whenHType.get(), whenH.get());
@@ -321,11 +315,14 @@ function CustomBHopModule() {
 					airSpeed1 =(whenAirSpeed.get())/10;
 					airSpeed2 += airSpeed1 * 10;
 				};
+				if (posX <= mc.thePlayer.posX && posZ <= mc.thePlayer.posZ && (!(posX < mc.thePlayer.posX && posX + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posX) && !(posZ < mc.thePlayer.posZ && posZ + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posZ)) || (posX <= mc.thePlayer.posX && posZ >= mc.thePlayer.posZ && (!(posX < mc.thePlayer.posX && posX + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posX) && !(posZ > mc.thePlayer.posZ && posZ - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posZ))) || (posX >= mc.thePlayer.posX && posZ >= mc.thePlayer.posZ && (!(posX > mc.thePlayer.posX && posX - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posX) && !(posZ > mc.thePlayer.posZ && posZ - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posZ))) || (posX >= mc.thePlayer.posX && posZ <= mc.thePlayer.posZ && (!(posX > mc.thePlayer.posX && posX - (airSpeed2 - (airSpeed2 /  accuracy)) >= mc.thePlayer.posX) && !(posZ < mc.thePlayer.posZ && posZ + (airSpeed2 - (airSpeed2 /  accuracy)) <= mc.thePlayer.posZ)))){
+					inrunspeed2 = -2;
+				};
 			};
         }else{
 			inrunspeed2 = 0;
 			mc.thePlayer.speedInAir = 0.02;
-			if (timer.get()){
+			if (TimerState.get()){
 				mc.timer.timerSpeed = 1
 			};
 			start = 1;
@@ -334,7 +331,7 @@ function CustomBHopModule() {
 	
     this.onDisable = function () {
 		mc.thePlayer.speedInAir = 0.02;
-		if (timer.get()) {
+		if (TimerState.get()) {
 			mc.timer.timerSpeed = 1
 		};
 		Strafe.setState(false);
@@ -351,7 +348,7 @@ function CustomBHopModule() {
 		values.add(resetH);
 		values.add(resetY);
 		values.add(strafing);
-		values.add(timer);
+		values.add(TimerState);
 		values.add(stairorslab);
 		values.add(sneakjump);
 		values.add(waterjump);
@@ -436,7 +433,7 @@ function speedMultiply(offset) {
 
 function timer(offset){
 	if (timer.get()) {
-		mc.timer.timerSpeed = offset;
+		mc.timer.timerSpeed = offset + inrunTimer;
 	};
 };
 
