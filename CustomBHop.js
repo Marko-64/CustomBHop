@@ -157,7 +157,7 @@ function CustomBHopModule() {
 			jumph = jumpHaslant.get();
 		};
 
-		if ((!(Math.round(posY - 0.1) == Math.round(posY)) && !(mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, mc.thePlayer.motionY - 1, 0).expand(0, 0, 0)).isEmpty())) && stairorslab.get()){
+				if ((!(Math.round(posY - 0.1) == Math.round(posY)) && !(mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, mc.thePlayer.motionY - 1, 0).expand(0, 0, 0)).isEmpty())) && stairorslab.get() && (maxinrunjumpY.get() <= 0.60)){
 			jumph = jumpSlab.get();
 			inrunspeed2 = -2;
 			SlabY2 = SlabY.get();
